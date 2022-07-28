@@ -22,12 +22,11 @@ type randInt struct {
 var wg = sync.WaitGroup{}
 
 func main() {
-
 	router := mux.NewRouter()
 	router.HandleFunc("/random/mean/", getApi)
+	routerWithMiddleware := http.TimeoutHandler(router, time.Second*10, "Timeout!")
 
-	fmt.Println("Listening on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":8080", routerWithMiddleware))
 
 }
 
@@ -53,10 +52,8 @@ func getApi(w http.ResponseWriter, req *http.Request) {
 	randInts[len(randInts)-1].Data = sumSet
 	randInts[len(randInts)-1].Stddev = calcStddev(randInts[len(randInts)-1].Data)
 
-	fmt.Printf("all randints is %v", sumSet)
 	json.NewEncoder(w).Encode(randInts)
 	w.Header().Add("Content-Type", "application/json")
-	fmt.Printf("params are %v and %v\n", r, l)
 	w.WriteHeader(http.StatusOK)
 
 }
@@ -82,7 +79,11 @@ func getRandom(l int) (string, error) {
 }
 
 func createRandInt(i int, l int, randInts []randInt) {
-	requestStr, _ := getRandom(l)
+	requestStr, err := getRandom(l)
+	if err != nil {
+		fmt.Printf("Error using random.org api: %s\n", err.Error())
+	}
+
 	requestInts := strings.Split(requestStr, "\n")
 
 	for _, item := range requestInts[:len(requestInts)-1] {
