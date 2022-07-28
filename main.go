@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"io/ioutil"
+	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -26,7 +27,8 @@ func main() {
 	router.HandleFunc("/random/mean/", getApi)
 
 	fmt.Println("Listening on port 8080")
-	http.ListenAndServe(":8080", router)
+	log.Fatal(http.ListenAndServe(":8080", router))
+
 }
 
 func getApi(w http.ResponseWriter, req *http.Request) {
