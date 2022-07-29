@@ -25,7 +25,7 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/random/mean/", getApi)
 	routerWithMiddleware := http.TimeoutHandler(router, time.Second*10, "Timeout!")
-
+	fmt.Println("Listening on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", routerWithMiddleware))
 
 }
@@ -33,7 +33,7 @@ func main() {
 func getApi(w http.ResponseWriter, req *http.Request) {
 	r, _ := strconv.Atoi(req.URL.Query().Get("requests"))
 	l, _ := strconv.Atoi(req.URL.Query().Get("length"))
-
+	ctx := req.Context()
 	// sum of all sets will be on last index
 	var randInts = make([]randInt, r+1)
 
@@ -56,6 +56,12 @@ func getApi(w http.ResponseWriter, req *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
+	select {
+	case <-time.After(1 * time.Second):
+		fmt.Println("request processed\n")
+	case <-ctx.Done():
+		fmt.Println("request cancelled\n")
+	}
 }
 
 func calcStddev(data []int) float64 {
