@@ -14,6 +14,7 @@ In examples, there was:
 but standard deviation of [1,2,3,4,5] is $\sqrt{2}$, so in my app this will be the result.
 
 It was not specified from what range the numbers should be taken from, so I set it to from 1 to 6 to make the results easy to interpret.
+
 There is sleep(3 seconds) function, for testing concurrency, it can be get rid of later.
 
 
