@@ -41,8 +41,8 @@ func main() {
 
 func getApi(c *gin.Context) {
 
-	r, _ := strconv.Atoi(c.Query("requests"))
-	l, _ := strconv.Atoi(c.Query("length"))
+	r, _ := strconv.Atoi(c.DefaultQuery("requests", "1"))
+	l, _ := strconv.Atoi(c.DefaultQuery("length", "2"))
 
 	// sum of all sets will be on last index
 	var randInts = make([]randInt, r+1)
