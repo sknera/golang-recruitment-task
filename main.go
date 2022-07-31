@@ -1,9 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
+	"github.com/vearne/gin-timeout"
 	"io/ioutil"
 	"log"
 	"math"
@@ -22,18 +22,28 @@ type randInt struct {
 var wg = sync.WaitGroup{}
 
 func main() {
-	router := mux.NewRouter()
-	router.HandleFunc("/random/mean/", getApi)
-	routerWithMiddleware := http.TimeoutHandler(router, time.Second*10, "Timeout!")
+
+	router := gin.Default()
+	defaultMsg := `{"code": -1, "msg":"http: Handler timeout"}`
+	router.Use(timeout.Timeout(
+		timeout.WithTimeout(6*time.Second),
+		timeout.WithErrorHttpCode(http.StatusRequestTimeout),
+		timeout.WithDefaultMsg(defaultMsg),
+		timeout.WithCallBack(func(r *http.Request) {
+			fmt.Println("timeout happen, url:", r.URL.String())
+		})))
+	router.GET("/random/mean/", getApi)
+
 	fmt.Println("Listening on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", routerWithMiddleware))
+	log.Fatal(router.Run(":8080"))
 
 }
 
-func getApi(w http.ResponseWriter, req *http.Request) {
-	r, _ := strconv.Atoi(req.URL.Query().Get("requests"))
-	l, _ := strconv.Atoi(req.URL.Query().Get("length"))
-	ctx := req.Context()
+func getApi(c *gin.Context) {
+
+	r, _ := strconv.Atoi(c.Query("requests"))
+	l, _ := strconv.Atoi(c.Query("length"))
+
 	// sum of all sets will be on last index
 	var randInts = make([]randInt, r+1)
 
@@ -52,16 +62,8 @@ func getApi(w http.ResponseWriter, req *http.Request) {
 	randInts[len(randInts)-1].Data = sumSet
 	randInts[len(randInts)-1].Stddev = calcStddev(randInts[len(randInts)-1].Data)
 
-	json.NewEncoder(w).Encode(randInts)
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	c.IndentedJSON(http.StatusOK, randInts)
 
-	select {
-	case <-time.After(1 * time.Second):
-		fmt.Println("request processed\n")
-	case <-ctx.Done():
-		fmt.Println("request cancelled\n")
-	}
 }
 
 func calcStddev(data []int) float64 {
