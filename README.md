@@ -18,5 +18,9 @@ It was not specified from what range the numbers should be taken from, so I set 
 There is sleep(3 seconds) function, for testing concurrency, it can be get rid of later.
 
 
+#### To run docker: 
+docker build -t rest_api . 
+docker run -d -p 8080:8080 rest_api
 
-### Dockerhub link with app image: https://hub.docker.com/r/ksero/random-api-app
+
+The solution using gin_gonic is on the __main__ branch, the previous solution using __gorrilla_mux__ is on the gorilla branch.
