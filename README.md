@@ -20,6 +20,7 @@ There is sleep(3 seconds) function, for testing concurrency, it can be get rid o
 
 #### To run docker: 
 docker build -t rest_api . 
+
 docker run -d -p 8080:8080 rest_api
 
 
