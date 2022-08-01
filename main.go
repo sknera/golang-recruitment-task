@@ -22,7 +22,6 @@ type randInt struct {
 var wg = sync.WaitGroup{}
 
 func main() {
-
 	router := gin.Default()
 	defaultMsg := `{"code": -1, "msg":"http: Handler timeout"}`
 	router.Use(timeout.Timeout(
@@ -36,7 +35,6 @@ func main() {
 
 	fmt.Println("Listening on port 8080")
 	log.Fatal(router.Run(":8080"))
-
 }
 
 func getApi(c *gin.Context) {
@@ -50,7 +48,6 @@ func getApi(c *gin.Context) {
 	for i := 0; i < r; i++ {
 		wg.Add(1)
 		go createRandInt(i, l, randInts)
-
 	}
 
 	wg.Wait()
@@ -63,7 +60,6 @@ func getApi(c *gin.Context) {
 	randInts[len(randInts)-1].Stddev = calcStddev(randInts[len(randInts)-1].Data)
 
 	c.IndentedJSON(http.StatusOK, randInts)
-
 }
 
 func calcStddev(data []int) float64 {
